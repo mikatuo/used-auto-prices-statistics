@@ -4,6 +4,7 @@ const service = {
     getCategories: getCategories,
     getMarks: getMarks,
     getModels: getModels,
+    getGears: getGears,
     getPriceStatisticsByYears: getPriceStatisticsByYears
 };
 
@@ -41,27 +42,39 @@ function getModels({ category, mark }) {
             .then(getJson)
             .then(mapAndResolve(resolve))
             .catch(reject);
-    })
+    });
+}
+
+function getGears({ category }) {
+    const url = `http://api.auto.ria.com/categories/${category}/gearboxes`;
+    return new Promise((resolve, reject) => {
+        axios.get(url)
+            .then(getJson)
+            .then(mapAndResolve(resolve))
+            .catch(reject);
+    });
 }
 
 function getPriceStatisticsByYears(filters) {
-    const result = {};
+    const result = [];
     // TODO: accept years and gear(s) from filters.
-    const years = [2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
-    const gear = 2; // automatic
+    const years = [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
 
     return new Promise((resolve, reject) => {
         Promise.all(years.map(year => {
-            const url = `http://api.auto.ria.com/average?model_id=${filters.model}&gear_id=${gear}&yers=${year}`;
+            const url = `http://api.auto.ria.com/average?model_id=${filters.model}&gear_id=${filters.gear}&yers=${year}`;
             return new Promise((resolve, reject) => {
                 axios.get(url)
                     .then(getJson)
-                    .then((data) => result[year] = data)
+                    .then((data) => {
+                        if (data.total)
+                            result.push({ year: year, data: data });
+                    })
                     .then(resolve)
                     .catch(reject);
             });
         }))
-            .then(() => resolve(result))
+            .then(() => resolve(result.sort(byYearsDescending)))
             .catch(reject);
     });
 }
@@ -74,5 +87,13 @@ function mapAndResolve(resolve) {
     return (data) => {
         const result = data.map((m) => { return { id: m.value, name: m.name }; });
         return resolve(result);
-    }
+    };
+}
+
+function byYearsDescending(a, b) {
+    if (a.year > b.year)
+        return -1;
+    if (a.year < b.year)
+        return 1;
+    return 0;
 }

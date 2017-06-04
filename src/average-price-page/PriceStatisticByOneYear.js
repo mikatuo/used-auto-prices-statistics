@@ -1,9 +1,6 @@
 import React from 'react';
 
 function PriceStatisticByOneYear({ year, data }) {
-    if (data.total === 0)
-        return null;
-
     return (
         <div>
             <h3>{year}</h3>

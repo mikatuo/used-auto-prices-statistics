@@ -10,6 +10,7 @@ class AveragePricePage extends Component {
             categories: dataservice.getCategories(),
             marks: null,
             models: null,
+            gears: null,
             filters: new AveragePriceFilters(),
             priceStatisticsByYears: null
         };
@@ -17,13 +18,14 @@ class AveragePricePage extends Component {
 
     onCategoryChange = (value) => {
         const filters = this.state.filters.copy();
-        let marks;
+        let marks, gears;
         this.setState({
             filters: filters.setCategory(value),
             marks: marks = dataservice.getMarks({ category: filters.category }),
+            gears: gears = dataservice.getGears({ category: filters.category }),
             models: null
         });
-        return marks;
+        return Promise.all([marks, gears]);
     }
 
     onMarkChange = (value) => {
@@ -42,42 +44,57 @@ class AveragePricePage extends Component {
         this.setState({
             filters: filters.setModel(value)
         });
+        this.maybeFetchData(filters);
+    }
+
+    onGearChange = (value) => {
+        const filters = this.state.filters.copy();
+        this.setState({
+            filters: filters.setGear(value)
+        });
+        this.maybeFetchData(filters);
+    }
+
+    maybeFetchData = (filters) => {
         if (filters.isValid())
             this.setState({
                 priceStatisticsByYears: dataservice.getPriceStatisticsByYears(filters)
-            })
+            });
     }
 
     setModel = (specification) => {
         this.onCategoryChange(specification.category)
             .then(() => this.onMarkChange(specification.mark))
-            .then(() => this.onModelChange(specification.model));
+            .then(() => this.onModelChange(specification.model))
+            .then(() => this.onGearChange(specification.gear));
     }
 
     render() {
-        const { categories, marks, models, filters, priceStatisticsByYears } = this.state;
+        const { categories, marks, models, gears, filters, priceStatisticsByYears } = this.state;
 
         return (
             <div>
-                <h1>Hello from the page!</h1>
+                {/* TODO: Move this into a new FavoriteFilters component */}
+                <div style={{float: 'left'}}>
+                    <button onClick={() => this.setModel({ category: '1', mark: '29', model: '1258', gear: '2' })}>Hyundai Accent</button>
+                    <button onClick={() => this.setModel({ category: '1', mark: '24', model: '239', gear: '2' })}>Ford Fiesta</button>
+                    <button onClick={() => this.setModel({ category: '1', mark: '24', model: '240', gear: '2' })}>Ford Focus</button>
+                    <button onClick={() => this.setModel({ category: '1', mark: '28', model: '265', gear: '2' })}>Honda Civic</button>
+                </div>
 
-                <button onClick={() => this.setModel({ category: '1', mark: '29', model: '1258' })}>Hyundai Accent</button>
-                <button onClick={() => this.setModel({ category: '1', mark: '24', model: '239' })}>Ford Fiesta</button>
-                <button onClick={() => this.setModel({ category: '1', mark: '24', model: '240' })}>Ford Focus</button>
-                <button onClick={() => this.setModel({ category: '1', mark: '28', model: '265' })}>Honda Civic</button>
-                <br />
-                <br />
-
-                <Dropdown label='Тип транспорта'
-                    source={categories} onChange={this.onCategoryChange} value={filters.category} />
-                {marks && <Dropdown label='Марка'
-                    source={marks} onChange={this.onMarkChange} value={filters.mark} />}
-                {models && <Dropdown label='Модель'
-                    source={models} onChange={this.onModelChange} value={filters.model} />}
-                
-                <br />
-                <br />
-                Filters: {JSON.stringify(filters)}
+                {/* TODO: Move this into a new Filters component */}
+                <div style={{float: 'left'}}>
+                    <Dropdown label='Тип транспорта'
+                        source={categories} onChange={this.onCategoryChange} value={filters.category} />
+                    {marks && <Dropdown label='Марка'
+                        source={marks} onChange={this.onMarkChange} value={filters.mark} />}
+                    {models && <Dropdown label='Модель'
+                        source={models} onChange={this.onModelChange} value={filters.model} />}
+                    <br />
+                    {gears && <Dropdown label='Коробка передач'
+                        source={gears} onChange={this.onGearChange} value={filters.gear} />}
+                </div>
+                <div style={{clear: 'both'}}></div>
                 
                 <br />
                 <br />
@@ -95,15 +112,17 @@ class AveragePriceFilters {
         this.category = null;
         this.mark = null;
         this.model = null;
+        this.gear = null;
     }
 
     isValid() {
-        return this.category && this.mark && this.model;
+        return this.category && this.mark && this.model && this.gear;
     }
 
     setCategory(id) {
         this.category = id;
         this.setMark(null);
+        this.setGear(null);
         return this;
     }
 
@@ -115,6 +134,11 @@ class AveragePriceFilters {
 
     setModel(id) {
         this.model = id;
+        return this;
+    }
+
+    setGear(id) {
+        this.gear = id;
         return this;
     }
 

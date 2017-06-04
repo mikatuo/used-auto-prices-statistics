@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import PriceStatisticByOneYear from './PriceStatisticByOneYear';
+import PriceChart from './PriceChart';
+import TotalChart from './TotalChart';
 
 class PriceStatisticsByYears extends Component {
     constructor(props) {
@@ -24,25 +25,15 @@ class PriceStatisticsByYears extends Component {
             });
         }
     }
-    
+
     render() {
         if (!this.state.statisticsByYears)
             return <div>Loading...</div>;
 
-        const years = [];
-        for (const year in this.state.statisticsByYears) {
-            if (!this.state.statisticsByYears.hasOwnProperty(year))
-                continue;
-            const stats = this.state.statisticsByYears[year];
-            years.push(
-                <PriceStatisticByOneYear key={year}
-                    year={year} data={stats} />
-            );
-        }
-
         return (
             <div>
-                {years}
+                <PriceChart data={this.state.statisticsByYears} />
+                <TotalChart data={this.state.statisticsByYears} />
             </div>
         );
     }
