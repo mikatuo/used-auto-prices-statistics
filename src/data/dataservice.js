@@ -26,7 +26,7 @@ function getCategories() {
 }
 
 function getMarks({ category }) {
-    const url = `http://api.auto.ria.com/categories/${category}/marks`;
+    const url = `//api.auto.ria.com/categories/${category}/marks`;
     return new Promise((resolve, reject) => {
         axios.get(url)
             .then(getJson)
@@ -36,7 +36,7 @@ function getMarks({ category }) {
 }
 
 function getModels({ category, mark }) {
-    const url = `http://api.auto.ria.com/categories/${category}/marks/${mark}/models`;
+    const url = `//api.auto.ria.com/categories/${category}/marks/${mark}/models`;
     return new Promise((resolve, reject) => {
         axios.get(url)
             .then(getJson)
@@ -46,7 +46,7 @@ function getModels({ category, mark }) {
 }
 
 function getGears({ category }) {
-    const url = `http://api.auto.ria.com/categories/${category}/gearboxes`;
+    const url = `//api.auto.ria.com/categories/${category}/gearboxes`;
     return new Promise((resolve, reject) => {
         axios.get(url)
             .then(getJson)
@@ -57,12 +57,12 @@ function getGears({ category }) {
 
 function getPriceStatisticsByYears(filters) {
     const result = [];
-    // TODO: accept years and gear(s) from filters.
+    // TODO: accept years from filters.
     const years = [2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017];
 
     return new Promise((resolve, reject) => {
         Promise.all(years.map(year => {
-            const url = `http://api.auto.ria.com/average`;
+            const url = `//api.auto.ria.com/average`;
             const urlParams = {
                 model_id: filters.model,
                 yers: year
