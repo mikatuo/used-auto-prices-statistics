@@ -45,6 +45,9 @@ class Dropdown extends Component {
             <option key={item.id} value={item.id}>{item.name}</option>
         );
 
+        if (!listItems.length)
+            return null;
+
         return (
             <select placeholder={label}
                 onChange={this.onChange}

@@ -62,9 +62,15 @@ function getPriceStatisticsByYears(filters) {
 
     return new Promise((resolve, reject) => {
         Promise.all(years.map(year => {
-            const url = `http://api.auto.ria.com/average?model_id=${filters.model}&gear_id=${filters.gear}&yers=${year}`;
+            const url = `http://api.auto.ria.com/average`;
+            const urlParams = {
+                model_id: filters.model,
+                yers: year
+            };
+            if (filters.gear)
+                urlParams.gear_id = filters.gear;
             return new Promise((resolve, reject) => {
-                axios.get(url)
+                axios.get(url, { params: urlParams })
                     .then(getJson)
                     .then((data) => {
                         if (data.total)
